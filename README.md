@@ -1,1 +1,1 @@
-# ansible-ad-inventroy
+# ansible-ad-inventory
