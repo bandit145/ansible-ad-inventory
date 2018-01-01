@@ -6,6 +6,7 @@ import ldap3
 import sys
 import json
 import os
+import ssl
 parser = argparse.ArgumentParser(description='Dynamic inventory script for Active Directory')
 parser.add_argument('-l','--list',help='list inventory',required=True,action='store_true')
 parser.add_argument('-d','--debug',help='Enable error message dumping',action='store_true')
@@ -33,9 +34,23 @@ def main():
 
 def ad_connection(config):
 	try:
-		server = ldap3.Server(host=config['config']['domain_controller'],port=int(config['config']['port']))
+		if config['config']['port'] == "389":
+			server = ldap3.Server(host=config['config']['domain_controller'],use_ssl=False,port=int(config['config']['port']))
+			
+		elif config['config']['port'] == "636":
+			if config['config']['validate_certs'].lower() == 'yes':
+				tls = ldap3.Tls(validate=ssl.CERT_REQUIRED)
+			elif config['config']['validate_certs'].lower() == 'no':
+				tls = ldap3.Tls(validate=ssl.CERT_NONE)
+			else:
+				print('The only valid options for "validate_certs" are yes/no',file=sys.stderr)
+				sys.exit(1)
+			server = ldap3.Server(host=config['config']['domain_controller'],use_ssl=True,port=int(config['config']['port']),tls=tls)
+		else:
+			print('"port" must be one of 389/636',file=sys.stderr)
+			sys.exit(0)
 		connection = ldap3.Connection(server=server,user=config['config']['user'],
-			password=config['config']['password'], authentication=ldap3.NTLM, raise_exceptions=True, auto_referrals=False)
+				password=config['config']['password'], authentication=ldap3.NTLM, raise_exceptions=True, auto_referrals=False)
 		connection.bind()
 		return connection
 	except KeyError as error:
@@ -45,6 +60,11 @@ def ad_connection(config):
 		sys.exit(1)
 	except ldap3.core.exceptions.LDAPOperationResult as error:
 		print('Could not bind!',file=sys.stderr)
+		if args.debug:
+			print(error, file=sys.stderr)
+		sys.exit(1)
+	except ldap3.core.exceptions.LDAPSocketOpenError as error:
+		print('LDAPS bind failed! Probably A certificate verification failure, set "validate_certs=no" or add the CA.crt to your system root store', file=sys.stderr)
 		if args.debug:
 			print(error, file=sys.stderr)
 		sys.exit(1)
