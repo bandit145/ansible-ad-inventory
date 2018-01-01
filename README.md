@@ -13,10 +13,12 @@ It has two modes of sorting your AD computers:
 2. By Organization Unit (ou):
 	In this mode a computer object is added into a group for each OU it is under.
 	This does follow the nesting of the OU up.
+	
 	Example:
-		server1 DN's is `cn=server1,ou=webservers,ou=us_datacenter`, In this scenario (Assuming `ou=us_datacenter` is the starting OU)
+		server1's DN is `cn=server1,ou=webservers,ou=us_datacenter`, In this scenario (Assuming `ou=us_datacenter` is the starting OU)
 		server1 will show up as a member to the "webservers" group and the "us_datacenter" group.
-		Resulting Ansible inv JSON: {"webservers":["server1"],"us_datacenter":["server1"]}
+		
+	Resulting Ansible inv JSON: {"webservers":["server1"],"us_datacenter":["server1"]}
 
 Note: Use --debug to run in full debug mode and be sure to submit any issues!
 
