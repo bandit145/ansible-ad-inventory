@@ -2,7 +2,7 @@
 
 
 ### Overview
-"active_directory.py" subtree searches through dns you providd in the .ini file.
+"active_directory.py" subtree searches through DN's you provide in the .ini file.
 
 It has two modes of sorting your AD computers:
 
