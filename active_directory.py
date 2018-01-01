@@ -14,7 +14,7 @@ args = parser.parse_args()
 def main():
 	inv_list = {}
 	try:
-		config = configparser.ConfigParser()
+		config = configparser.SafeConfigParser()
 		path = os.path.realpath(__file__).split('/')
 		config.read_file(open('/'.join(path[0:len(path)-1])+'/active_directory.ini'))
 	except IOError:
@@ -30,7 +30,6 @@ def main():
 	print(json.dumps(inv_list, indent=4))
 	sys.exit(0)
 
-#def group_lookup(computers, inv_list):
 
 def ad_connection(config):
 	try:
@@ -75,7 +74,6 @@ def ad_inv_by_security_group(config, inv_list):
 			connection.search(search_filter='(objectclass=computer)',search_base=ou,
 				attributes=['dnshostname','cn','memberof'])
 			for computer in connection.response:
-				#print(computer)
 				if 'attributes' in computer:
 					if len(computer['attributes']['memberof']) > 0:
 						for groups in computer['attributes']['memberof']:
